@@ -1,5 +1,5 @@
 # 対象のスクリプトを読み込み
-. "./FileNameReplacer.ps1"
+. "./main/FileNameReplacer.ps1"
 
 # テストケースの定義
 Describe "Add-Numbers Tests" {
