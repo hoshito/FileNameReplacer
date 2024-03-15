@@ -13,7 +13,7 @@ function Copy-File {
         [string]$ResultFilePath
     )
 
-    $destinationDir = Split-Path -Path $destinationFile
+    $destinationDir = Split-Path -Path $ResultFilePath
     if (-not (Test-Path $destinationDir)) {
         New-Item -Path $destinationDir -ItemType Directory
     } 
