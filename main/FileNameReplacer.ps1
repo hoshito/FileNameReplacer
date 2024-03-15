@@ -1,12 +1,8 @@
-function Add-Numbers {
+function Set-ReplaceString {
     param (
-        [int]$Number1,
-        [int]$Number2
+        [string]$TargetString,
+        [string]$OldValue,
+        [string]$NewValue
     )
-
-    $Sum = $Number1 + $Number2
-    return $Sum
+    return $TargetString -replace $OldValue, $NewValue
 }
-
-# $Result = Add-Numbers -Number1 5 -Number2 7
-# Write-Host "The result is: $Result"
