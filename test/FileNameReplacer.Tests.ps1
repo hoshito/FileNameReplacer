@@ -17,3 +17,56 @@ Describe "Set-ReplaceString Tests" {
         $result | Should -Be "あしたお"
     }
 }
+
+Describe "Copy-File Tests" {
+    BeforeEach {
+      # テスト用のファイルとコピー先の設定
+      $sourceFile = "./test/origin/testfile.txt"
+      $destinationFile = "./test/result/testfile.txt"
+      $sourceDir = Split-Path -Path $sourceFile
+      $destinationDir = Split-Path -Path $destinationFile
+
+      # コピー元のディレクトリがなければ作成
+      if (-not (Test-Path $sourceDir)) {
+          New-Item -Path $sourceDir -ItemType Directory
+      }
+
+      # テスト実行前にテスト用のファイルを作成
+      if (-not (Test-Path $sourceFile)) {
+          New-Item -Path $sourceFile -ItemType File -Value "This is a test file."
+      }
+
+      # コピー先のディレクトリは存在しない状態
+      Remove-Item $destinationDir -ErrorAction SilentlyContinue -Recurse
+    }
+
+    Context "通常時のコピー" {
+        It "コピー先のファイルと元のファイルの内容が一致すること" {
+            Copy-File -TargetFilePath $sourceFile -ResultFilePath $destinationFile
+            $sourceContent = Get-Content $sourceFile
+            $destinationContent = Get-Content $destinationFile
+            $destinationContent | Should -BeExactly $sourceContent
+        }
+    }
+
+   context "destinationFileがすでに存在していた場合" {
+        BeforeEach {
+            New-Item -Path $destinationDir -ItemType Directory
+            New-Item -Path $destinationFile -ItemType File -Value "already file"
+        }
+
+        It "コピー先のファイルと元のファイルの内容は一致しないこと(上書きされていないこと)" {
+            $resultOutput = Copy-File -TargetFilePath $sourceFile -ResultFilePath $destinationFile
+            $destinationContent = Get-Content $destinationFile
+            $destinationContent | Should -BeExactly "already file"
+            $resultOutput | Should -BeExactly "testfile.txtはコピーできませんでした"
+        }
+    }
+
+    AfterEach {
+        # テスト後のクリーンアップ
+        Remove-Item $sourceDir -ErrorAction SilentlyContinue -Recurse
+        Remove-Item $destinationDir -ErrorAction SilentlyContinue -Recurse
+    }
+}
+
