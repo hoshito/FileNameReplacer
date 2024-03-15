@@ -1,5 +1,6 @@
 # 対象のスクリプトを読み込み
 . Join-Path -Path $PSScriptRoot -ChildPath "../main/FileNameReplacer.ps1"
+$testDir = Join-Path -Path $PSScriptRoot -ChildPath "./test"
 
 Describe "Set-ReplaceString Tests" {
     It "文字列が置換されること" {
@@ -21,8 +22,8 @@ Describe "Set-ReplaceString Tests" {
 Describe "Copy-File Tests" {
     BeforeEach {
       # テスト用のファイルとコピー先の設定
-      $sourceFile = "./test/origin/testfile.txt"
-      $destinationFile = "./test/result/testfile.txt"
+      $sourceFile = "${testDir}/origin/testfile.txt"
+      $destinationFile = "${testDir}/result/testfile.txt"
       $sourceDir = Split-Path -Path $sourceFile
       $destinationDir = Split-Path -Path $destinationFile
 

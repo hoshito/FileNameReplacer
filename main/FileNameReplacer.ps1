@@ -25,3 +25,16 @@ function Copy-File {
         Copy-Item -Path $TargetFilePath -Destination $ResultFilePath
     }
 }
+
+function Start-Main {
+    param(
+        [string]$TargetDirPath,
+        [string]$replacement,
+        [string]$newString
+    )
+
+    Get-ChildItem -Path $directoryPath -File | ForEach-Object {
+        # ここで各ファイルに対して行いたい操作を記述します
+        Write-Host "Processing file: $($_.Name)"
+    }
+}
