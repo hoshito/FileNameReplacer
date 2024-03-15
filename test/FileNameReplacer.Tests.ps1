@@ -1,6 +1,8 @@
 # 対象のスクリプトを読み込み
-. Join-Path -Path $PSScriptRoot -ChildPath "../main/FileNameReplacer.ps1"
-$testDir = Join-Path -Path $PSScriptRoot -ChildPath "./test"
+$targetScript = Join-Path -Path $PSScriptRoot -ChildPath "../main/FileNameReplacer.ps1"
+. $targetScript
+
+$testDir = $PSScriptRoot
 
 Describe "Set-ReplaceString Tests" {
     It "文字列が置換されること" {
@@ -21,24 +23,24 @@ Describe "Set-ReplaceString Tests" {
 
 Describe "Copy-File Tests" {
     BeforeEach {
-      # テスト用のファイルとコピー先の設定
-      $sourceFile = "${testDir}/origin/testfile.txt"
-      $destinationFile = "${testDir}/result/testfile.txt"
-      $sourceDir = Split-Path -Path $sourceFile
-      $destinationDir = Split-Path -Path $destinationFile
+        # テスト用のファイルとコピー先の設定
+        $sourceFile = "${testDir}/origin/testfile.txt"
+        $destinationFile = "${testDir}/result/testfile.txt"
+        $sourceDir = Split-Path -Path $sourceFile
+        $destinationDir = Split-Path -Path $destinationFile
 
-      # コピー元のディレクトリがなければ作成
-      if (-not (Test-Path $sourceDir)) {
-          New-Item -Path $sourceDir -ItemType Directory
-      }
+        # コピー元のディレクトリがなければ作成
+        if (-not (Test-Path $sourceDir)) {
+            New-Item -Path $sourceDir -ItemType Directory
+        }
 
-      # テスト実行前にテスト用のファイルを作成
-      if (-not (Test-Path $sourceFile)) {
-          New-Item -Path $sourceFile -ItemType File -Value "This is a test file."
-      }
+        # テスト実行前にテスト用のファイルを作成
+        if (-not (Test-Path $sourceFile)) {
+            New-Item -Path $sourceFile -ItemType File -Value "This is a test file."
+        }
 
-      # コピー先のディレクトリは存在しない状態
-      Remove-Item $destinationDir -ErrorAction SilentlyContinue -Recurse
+        # コピー先のディレクトリは存在しない状態
+        Remove-Item $destinationDir -ErrorAction SilentlyContinue -Recurse
     }
 
     Context "通常時のコピー" {
@@ -50,7 +52,7 @@ Describe "Copy-File Tests" {
         }
     }
 
-   context "destinationFileがすでに存在していた場合" {
+    context "destinationFileがすでに存在していた場合" {
         BeforeEach {
             New-Item -Path $destinationDir -ItemType Directory
             New-Item -Path $destinationFile -ItemType File -Value "already file"
@@ -71,3 +73,35 @@ Describe "Copy-File Tests" {
     }
 }
 
+Describe "Start-Main Tests" {
+    BeforeAll {
+        $sourceDir = "${testDir}/origin"
+        $resultDir = "${testDir}/result"
+
+        if (-not (Test-Path $sourceDir)) {
+            New-Item -Path $sourceDir -ItemType Directory
+        }
+
+        New-Item -Path "${sourceDir}/test1_hoge.txt" -ItemType File -Value "This is a test file."
+        New-Item -Path "${sourceDir}/test2_hoge.txt" -ItemType File -Value "This is a test file."
+        New-Item -Path "${sourceDir}/test3_hoge.txt" -ItemType File -Value "This is a test file."
+    }
+
+    It "ディレクトリ内のファイル分の処理がされること" {
+        Mock Copy-File {}
+        Start-Main -TargetDirPath $sourceDir -Replacement "_hoge" -NewString "_fuga"
+
+        Assert-MockCalled Copy-File -Times 3 -Exactly -Scope It
+
+        # 全部チェックする必要はない. 1ファイルだけチェック
+        $expectedTarget = [System.IO.Path]::GetFullPath("${sourceDir}/test1_hoge.txt")
+        $expectedResult = [System.IO.Path]::GetFullPath("${resultDir}/test1_fuga.txt")
+        Assert-MockCalled Copy-File -Times 1 -Exactly -Scope It -ParameterFilter {
+            $TargetFilePath -eq $expectedTarget -and $ResultFilePath -eq $expectedResult
+        }
+    }
+
+    AfterAll {
+        Remove-Item $sourceDir -ErrorAction SilentlyContinue -Recurse
+    }
+}
