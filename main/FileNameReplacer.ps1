@@ -20,7 +20,7 @@ function Copy-File {
 
     if (Test-Path $ResultFilePath) {
         $TargetFile = Split-Path -Path $TargetFilePath -Leaf
-        Write-Output "${TargetFile}はコピーできませんでした"
+        Write-Output "already exists ${TargetFile}"
     } else {
         Copy-Item -Path $TargetFilePath -Destination $ResultFilePath
     }
