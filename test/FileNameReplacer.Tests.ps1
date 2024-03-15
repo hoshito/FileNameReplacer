@@ -1,5 +1,5 @@
 # 対象のスクリプトを読み込み
-. "./main/FileNameReplacer.ps1"
+. Join-Path -Path $PSScriptRoot -ChildPath "../main/FileNameReplacer.ps1"
 
 Describe "Set-ReplaceString Tests" {
     It "文字列が置換されること" {
